@@ -1,2 +1,1 @@
-# BEV
-Blockchain Enabled Voting System
+# eVote

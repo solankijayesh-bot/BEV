@@ -1,0 +1,11 @@
+{
+  "registrarDistinguishedName": "New Delhi Municipality Registrar",
+  "registrarOrg": "India",
+  "registrarLocality": "New Delhi",
+  "registrarState": "India",
+  "registrarCountry": "India",
+  "registrarPrecinctNums": [1,2,3],
+  "electionName": "2020 Election",
+  "electionCountry": "India",
+  "electionYear": 2020
+}

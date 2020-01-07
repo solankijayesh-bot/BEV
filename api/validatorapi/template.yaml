@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: ETL v2
+    Description: ETL version 2 for jira reports
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    Handler: lambda.handler
+    MemorySize: 128
+    Timeout: 60
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+            - apigateway.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: GatewayRolePolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - dynamodb:*
+            - kinesis:*
+            - execute-api:ManageConnections
+            - execute-api:Invoke
+            - logs:*
+            - cloudwatch:DeleteAlarms
+            - cloudwatch:DescribeAlarmHistory
+            - cloudwatch:DescribeAlarms
+            - cloudwatch:DescribeAlarmsForMetric
+            - cloudwatch:GetMetricStatistics
+            - cloudwatch:ListMetrics
+            - cloudwatch:PutMetricAlarm
+            - xray:PutTraceSegments
+            Resource: '*'
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName:
+        Ref: Environment
+      EndpointConfiguration: REGIONAL
+      TracingEnabled: true
+  FnHookToStream:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://evoting-aap/lambda.zip
+      Events:
+        ToolchainApi:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: Api
+            Path: /voter
+            Method: GET
+      Role:
+        Fn::GetAtt:
+        - LambdaRole
+        - Arn
